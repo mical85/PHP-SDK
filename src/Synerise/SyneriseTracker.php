@@ -35,13 +35,13 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
      * Instantiates a new SyneriseTracker instance.
      * @param array $config
      */
-    public function __construct($config = array()) {
-
+    public function __construct($config = array(), $logger = null)
+    {
     	if(isset($config['allowFork']) && $config['allowFork'] == true){
 			$config['handler'] = new ForkCurlHandler([]);
     	}
 
-        parent::__construct($config);
+        parent::__construct($config, $logger);
 
         $this->client = Producers\Client::getInstance();
         $this->event = Event::getInstance();
