@@ -14,6 +14,8 @@ abstract class SyneriseAbstractHttpClient extends Client
         'headers',
     ];
 
+    protected $apiKey;
+
     /** @var string */
     const DEFAULT_CONTENT_TYPE = 'application/json';
 
@@ -57,6 +59,10 @@ abstract class SyneriseAbstractHttpClient extends Client
     {
         $this->_logger = $logger;
 
+        if(isset($config['apiKey'])) {
+            $this->apiKey = $config['apiKey'];
+        }
+        
         switch (substr(self::VERSION,0,1)):
             case '6':
                 $config = Guzzle6Adapter::prepareConfig(self::mergeConfig($config), $logger);

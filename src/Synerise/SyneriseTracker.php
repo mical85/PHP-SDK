@@ -119,4 +119,34 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
         ];
     }
 
+    public function formSubmit($label, $params = [], $category = 'client.web.browser.contact')
+    {
+        $this->sendEvent('form.submit', $category, $label, $params);
+    }
+
+    public function sendEvent($action, $category, $label, $params = [])
+    {
+        if(!isset($params['uuid']) && !empty($this->getUuid())){
+            $params['uuid'] = $this->getUuid();
+        }
+
+        $data['label'] = $label;
+        $data['params'] = $params;
+        $data['action'] = $action;
+        $data['category'] = $category;
+
+        try {
+            $response = $this->put('http://tck.synerise.com/tracker/' . $this->apiKey, array('json' => $data));
+        } catch (\Exception $e) {
+            if($this->getLogger()) {
+                $this->getLogger()->alert($e->getMessage());
+            }
+        }
+        
+        if(isset($response) && $response->getStatusCode() == '200') {
+            return true;
+        }
+        return false;
+    }
+
 }
