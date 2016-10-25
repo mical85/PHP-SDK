@@ -4,6 +4,7 @@ namespace Synerise\Exception;
 class SyneriseException extends \RuntimeException
 {
     const NEWLETTER_ALREADY_SUBSCRIBED = 20000;
+    const EMPTY_NEWSLETTER_SETTINGS = 20001;
 
 
     const COUPON_ALREADY_USED = 20105;
@@ -12,4 +13,5 @@ class SyneriseException extends \RuntimeException
 
     const UNKNOWN_ERROR = -1;
     const API_RESPONSE_ERROR = 500;
+    const API_RESPONSE_INVALID = 30000;
 }
