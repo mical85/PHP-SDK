@@ -60,16 +60,22 @@ abstract class ProducerAbstract
      * @param array $message
      */
     public function enqueue($message = array()) {
-        if(!empty(Client::getInstance()->getCustomIdetify())){
-            $message['clientCustomId'] =  Client::getInstance()->getCustomIdetify();
+        $customIdetify = Client::getInstance()->getCustomIdetify();
+        if(!empty($customIdetify)){
+            $message['clientCustomId'] =  $customIdetify;
         }
 
-
-        if(!empty(Client::getInstance()->getUuid())){
-            $message['uuid'] =  Client::getInstance()->getUuid();
+        $email = Client::getInstance()->getEmail();
+        if(!empty($email)){
+            $message['email'] =  $email;
         }
 
-        if(!$message['uuid']) {
+        $uuid = Client::getInstance()->getUuid();
+        if(!empty($uuid)){
+            $message['uuid'] =  $uuid;
+        }
+
+        if(!isset($message['uuid']) || !$message['uuid']) {
             $clientUUID = $this->getUuid();
             if(!empty($clientUUID)) {
                 $message['uuid'] = $clientUUID;
@@ -118,8 +124,10 @@ abstract class ProducerAbstract
             $ip = $_SERVER['HTTP_CLIENT_IP'];
         } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } else {
+        } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
             $ip = $_SERVER['REMOTE_ADDR'];
+        } else {
+            return '0.0.0.0';
         }
 
         return $ip;

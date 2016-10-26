@@ -20,13 +20,13 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
 
     /**
      * An instance of the Event class (used for tracking custom event)
-     * @var Producer\Event
+     * @var Producers\Event
      */
     public $event;
 
     /**
      * An instance of the Transaction class (used for tracking purchase event)
-     * @var Producer\Transaction
+     * @var Producers\Transaction
      */
     public $transaction;
 

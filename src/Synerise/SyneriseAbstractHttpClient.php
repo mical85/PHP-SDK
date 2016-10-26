@@ -29,10 +29,10 @@ abstract class SyneriseAbstractHttpClient extends Client
     const DEFAULT_API_VERSION = '3.0';
 
     /** @var string */
-    const BASE_API_URL = 'http://api.synerise.com';
+    const BASE_API_URL = 'https://api.synerise.com';
 
     /** @var string */
-    const BASE_TCK_URL = 'http://tck.synerise.com/sdk-proxy';
+    const BASE_TCK_URL = 'https://tck.synerise.com/sdk-proxy';
 
     private static $_instances = array();
 
