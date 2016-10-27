@@ -43,9 +43,9 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
 
         parent::__construct($config, $logger);
 
-        $this->client = Producers\Client::getInstance();
-        $this->event = Event::getInstance();
-        $this->transaction = Producers\Transaction::getInstance();
+        $this->client       = Producers\Client::getInstance();
+        $this->event        = Producers\Event::getInstance();
+        $this->transaction  = Producers\Transaction::getInstance();
 
     }
 
@@ -58,9 +58,11 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
 
     public function sendQueue(){
 
-        $data['json'] = array_merge($this->event->getRequestQueue(),
-                $this->transaction->getRequestQueue(),
-                $this->client->getRequestQueue());
+        $data['json'] = array_merge(
+            $this->event->getRequestQueue(),
+            $this->transaction->getRequestQueue(),
+            $this->client->getRequestQueue()
+        );
         
         if(count($data['json']) == 0) {
             return;

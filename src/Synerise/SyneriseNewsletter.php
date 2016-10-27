@@ -7,8 +7,15 @@ use Synerise\Response\Newsletter as SyneriseResponseNewsletter;
 
 class SyneriseNewsletter extends SyneriseAbstractHttpClient
 {
-    
-    public function subscribe($email, $additionalParams = array())
+    /**
+     * Subcribe user to newsletter
+     *
+     * @param string $email
+     * @param array $additionalParams
+     * @throws SyneriseException
+     * @return \Synerise\Response\Newsletter
+     */
+    public function subscribe($email, array $additionalParams = array())
     {
 
         try {
@@ -19,7 +26,7 @@ class SyneriseNewsletter extends SyneriseAbstractHttpClient
             }
 
             if(isset($additionalParams['sex'])) { //@todo
-                $baseParams['sex '] = $additionalParams['sex'];
+                $baseParams['sex'] = $additionalParams['sex'];
             }
 
             try {

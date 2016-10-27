@@ -13,21 +13,19 @@ class SyneriseTrackingCode extends SyneriseAbstractHttpClient
     public function trackingcode($domain) 
     {
         try {
-            $request = $this->createRequest("GET", SyneriseAbstractHttpClient::BASE_API_URL . "/trackingcode/$domain");
-            $this->_log($request, "TrackingCode");
-            
-            $response = $this->send($request);
-            $this->_log($response, "TrackingCode");            
+            $response = $this->get(SyneriseAbstractHttpClient::BASE_API_URL . "/trackingcode/$domain");
 
             if ($response->getStatusCode() != '200') {
                 throw new Exception\SyneriseException('API Synerise not responsed 200.', 500);
             }
             
-            $responseArray = $response->json();            
+            $responseArray = json_decode($response->getBody(), true);
             return isset($responseArray['data']) ? $responseArray['data'] : null;                        
 
         } catch (\Exception $e) {
-            $this->_log($e->getMessage(), "DefaultERROR");
+            if($this->getLogger()) {
+                $this->getLogger()->alert($e->getMessage());
+            }
             throw $e;
         }
     }

@@ -5,7 +5,6 @@ use Synerise\Exception;
 
 class Newsletter extends AbstractResponse
 {
-
     /**
      * @var string
      */
@@ -21,23 +20,38 @@ class Newsletter extends AbstractResponse
      */    
     private $_newsletterAgreement;
 
-    public function __construct($response)
+    /**
+     *
+     * @param array $response
+     * @return void
+     */
+    public function __construct(array $response)
     {
-        parent::__construct($response);
-
-        if(!isset($response['data'])) {
-            return;
+        if(isset($response['data'])) {
+            parent::__construct($response);
+            $data = $response['data'];
+        } else {
+            $data = $response;
         }
 
-        $this->_status = isset($response['data']['status']) ? $response['data']['status'] : null;
-        $this->_message = isset($response['data']['message']) ? $response['data']['message'] : null;
-        $this->_newsletterAgreement = isset($response['data']['newsletterAgreement']) ? $response['data']['newsletterAgreement'] : null;
+        $this->_status = isset($data['status']) ? $data['status'] : null;
+        $this->_message = isset($data['message']) ? $data['message'] : null;
+        $this->_newsletterAgreement = isset($data['newsletterAgreement']) ? $data['newsletterAgreement'] : null;
     }
 
+    /**
+     * Return Newsletter response object.
+     *
+     * @return \Synerise\Response\Newsletter
+     * @throws Exception\SyneriseException
+     */
     public function success()
     {
         if ($this->_status == 'ok' && $this->_message == 'newsletter_request_success') {
             return $this;
+        }
+        if ($this->_status == 'empty_newsletter_settings') {
+            throw new Exception\SyneriseException('Newsletter.NotConfigured', Exception\SyneriseException::EMPTY_NEWSLETTER_SETTINGS);
         }
 
         switch ($this->_message) {
@@ -48,18 +62,49 @@ class Newsletter extends AbstractResponse
         }
     }
 
+    /**
+     * Throws exception based on response status
+     *
+     * @throws Exception\SyneriseException
+     * @throws SyneriseException
+     */
     public function fail()
     {
         switch ($this->_status) {
             case 'empty_newsletter_settings':
                 throw new Exception\SyneriseException('Newsletter.NotConfigured', Exception\SyneriseException::EMPTY_NEWSLETTER_SETTINGS);
             default:
-                throw new SyneriseException('API Synerise not responsed 200.', SyneriseException::API_RESPONSE_ERROR);
+                throw new Exception\SyneriseException('API Synerise not responsed 200.', Exception\SyneriseException::API_RESPONSE_ERROR);
         }   
     }
-    
+
+    /**
+     * Subscirption message
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->_message;
+    }
+
+    /**
+     * Newsletter agreement
+     *
+     * @return string
+     */
     public function getNewsletterAgreement()
     {
         return $this->_newsletterAgreement;
+    }
+
+    /**
+     * Subscription status
+     *
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->_status;
     }
 }

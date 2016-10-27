@@ -1,10 +1,8 @@
 <?php
 namespace Synerise\Response;
 
-class ActiveCoupon
+class ActiveCoupon extends AbstractResponse
 {
-
-
     /**
      *
      * @var Synerise\Response\Coupon
@@ -15,13 +13,13 @@ class ActiveCoupon
      *
      * @var string
      */
-    private $_redeemedAt = null;
+    private $_usedAt = null;
 
     /**
      *
      * @var string
      */
-    private $_couponUuid = null;
+    private $_uuid = null;
 
     /**
      *
@@ -41,14 +39,31 @@ class ActiveCoupon
      */
     private $_isValid = false;
 
-    public function __construct($activeCoupon = array())
+    /**
+     *
+     * @param array $response
+     * @return void
+     */
+    public function __construct($response = array())
     {
-        $this->_redeemedAt = isset($activeCoupon['redeemedAt']) ? $activeCoupon['redeemedAt'] : null;
-        $this->_couponUuid = isset($activeCoupon['couponUuid']) ? $activeCoupon['couponUuid'] : null;
-        $this->_activatedAt = isset($activeCoupon['activatedAt']) ? $activeCoupon['activatedAt'] : null;
-        $this->_expiresAt = isset($activeCoupon['expiresAt']) ? $activeCoupon['expiresAt'] : null;
-        $this->_isValid = isset($activeCoupon['isValid']) ? $activeCoupon['isValid'] : false;
-        $this->_coupon = isset($activeCoupon['coupon']) ? new Coupon($activeCoupon['coupon']) : null;
+        if(isset($response['data'])) {
+            parent::__construct($response);
+            $data = $response['data'];
+        } else {
+            $data = $response;
+        }
+
+        $this->_uuid        = isset($data['uuid']) ? $data['uuid'] : null;
+        $this->_isValid     = isset($data['isValid']) ? $data['isValid'] : false;
+        $this->_usedAt      = isset($data['usedAt']) ? $data['usedAt'] : null;
+        $this->_activatedAt = isset($data['activatedAt']) ? $data['activatedAt'] : null;
+        $this->_expiresAt   = isset($data['expiresAt']) ? $data['expiresAt'] : null;
+        
+        if(isset($data['coupon'])) {
+            $couponData = $data['coupon'];
+            $couponData['uuid'] = $this->_uuid;
+            $this->_coupon = new Coupon(array('data' => $couponData));
+        }
     }
 
     /**
@@ -82,24 +97,24 @@ class ActiveCoupon
         return;
     }
 
-    public function getRedeemedAt()
+    public function getUsedAt()
     {
-        return $this->_redeemedAt;
+        return $this->_usedAt;
     }
 
-    public function setRedeemedAt($redeemedAt)
+    public function setUsedAt($usedAt)
     {
-        $this->_redeemedAt = !empty($redeemedAt) && is_numeric($redeemedAt) ? true : false;
+        $this->_usedAt = !empty($usedAt) && is_numeric($usedAt) ? true : false;
     }
 
-    public function getCouponUuid()
+    public function getUuid()
     {
-        return $this->_couponUuid;
+        return $this->_uuid;
     }
 
-    public function setCouponUuid($couponUuid)
+    public function setUuid($uuid)
     {
-        $this->_couponUuid = !empty($couponUuid) && is_numeric($couponUuid) ? true : false;
+        $this->_uuid = !empty($uuid) && is_numeric($uuid) ? true : false;
     }
     
     public function getActivatedAt()
