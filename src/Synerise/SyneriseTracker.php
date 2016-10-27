@@ -38,7 +38,7 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
     public function __construct($config = array(), $logger = null)
     {
     	if(isset($config['allowFork']) && $config['allowFork'] == true){
-			$config['handler'] = new ForkCurlHandler([]);
+			$config['handler'] = new ForkCurlHandler(array());
     	}
 
         parent::__construct($config, $logger);
@@ -121,15 +121,16 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
         ];
     }
 
-    public function formSubmit($label, $params = [], $category = 'client.web.browser.contact')
+    public function formSubmit($label, $params = array(), $category = 'client.web.browser.contact')
     {
         $this->sendEvent('form.submit', $category, $label, $params);
     }
 
-    public function sendEvent($action, $category, $label, $params = [])
+    public function sendEvent($action, $category, $label, $params = array())
     {
-        if(!isset($params['uuid']) && !empty($this->getUuid())){
-            $params['uuid'] = $this->getUuid();
+        $uuid = $this->getUuid();
+        if(!isset($params['uuid']) && !empty($uuid)){
+            $params['uuid'] = $uuid;
         }
 
         $data['label'] = $label;
@@ -138,7 +139,10 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
         $data['category'] = $category;
 
         try {
-            $response = $this->put('http://tck.synerise.com/tracker/' . $this->apiKey, array('json' => $data));
+            $response = $this->put('http://tck.synerise.com/tracker/' . $this->apiKey, array(
+                'json' => $data,
+                'timeout' => 1
+            ));
         } catch (\Exception $e) {
             if($this->getLogger()) {
                 $this->getLogger()->alert($e->getMessage());

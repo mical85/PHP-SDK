@@ -52,7 +52,7 @@ class ForkCurlHandler
             $response = new CompletedFutureArray($response + [
                 'status'        => 200,
                 'body'          => null,
-                'headers'       => [],
+                'headers'       => array(),
                 'reason'        => null,
                 'effective_url' => null,
             ]);

@@ -21,8 +21,10 @@ class SyneriseNewsletter extends SyneriseAbstractHttpClient
         try {
             $baseParams = array();
             $baseParams['email'] = $email;
-            if(!empty($this->getUuid())){
-                $baseParams['uuid'] = $this->getUuid();
+            
+            $uuid = $this->getUuid();
+            if(!empty($uuid)){
+                $baseParams['uuid'] = $uuid;
             }
 
             if(isset($additionalParams['sex'])) { //@todo

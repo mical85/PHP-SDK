@@ -137,7 +137,7 @@ abstract class SyneriseAbstractHttpClient extends Client
      * @return array
      * @throws \InvalidArgumentException if a parameter is missing
      */
-    protected function mergeConfig(array $config = []) {
+    protected function mergeConfig(array $config = array()) {
 
         $defaults = static::getDefaultConfig();
         $required = static::$required;
