@@ -155,4 +155,34 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
         return false;
     }
 
+    public function renderJsScripts($trackingCode, $apiKey)
+    {
+        return '<script type="text/javascript">'
+            .'var _riseA = _riseA || [];'
+            .'_riseA.push([ \'setTracker\', \''.$trackingCode.'\' ]);'
+
+            .'(function() {'
+                .'var snrs = document.createElement(\'script\');'
+                .'snrs.type = \'text/javascript\';'
+                .'snrs.async = true;'
+                .'snrs.src = (\'https:\' == document.location.protocol ? \'https://\''
+                        .': \'http://\')'
+                    .'+ \''.self::TC_HOST.'/'.self::TC_SCRIPT.'\';'
+                .'var s = document.getElementsByTagName(\'script\')[0];'
+                .'s.parentNode.insertBefore(snrs, s);'
+            .'})();'
+        .'</script>'
+        .'<script>'
+            .'function onSyneriseLoad() {'
+                .'SR.auth.apiKey(\''.$apiKey.'\');'
+                .'SR.init();'
+            .'}'
+            .'(function(s,y,n,e,r,i,se){s[\'SyneriseObjectNamespace\']=r;s[r]=s[r]||[],s[r]._t=1*new Date(),'
+                .'s[r]._i=0,s[r]._l=i;var z=y.createElement(n),se=y.getElementsByTagName(n)[0];z.async=1;z.src=e;'
+                .'se.parentNode.insertBefore(z,se);z.onload=z.onreadystatechange=function(){var rdy=z.readyState;'
+                    .'if(!rdy||/complete|loaded/.test(z.readyState)){s[i]();z.onload = null;z.onreadystatechange=null;}};'
+            .'})(window,document,\'script\',\''.self::JS_SDK_URL.'\',\'SR\', \'onSyneriseLoad\');'
+        .'</script>';
+    }
+
 }

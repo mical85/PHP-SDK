@@ -34,6 +34,15 @@ abstract class SyneriseAbstractHttpClient extends Client
     /** @var string */
     const BASE_TCK_URL = 'https://tck.synerise.com/sdk-proxy';
 
+    /** @var string */
+    const TC_HOST = 'tc.synerise.com';
+
+    /** @var string */
+    const TC_SCRIPT = 'snrs-2.0.js';
+
+    /** @var string */    
+    const JS_SDK_URL = 'https://app.synerise.com/js/sdk/synerise-javascript-sdk-latest.min.js';
+
     private static $_instances = array();
 
     /**
