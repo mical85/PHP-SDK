@@ -1,15 +1,6 @@
 <?php
 namespace Synerise;
 
-use Synerise\Exception\SyneriseException;
-use Synerise\Producers\Client;
-use Synerise\Producers\Event;
-use GuzzleHttp\Pool;
-use GuzzleHttp\Ring\Client\MockHandler;
-use GuzzleHttp\Subscriber\History;
-use Synerise\Consumer\ForkCurlHandler;
-use GuzzleHttp\Message;
-
 class SyneriseClient extends SyneriseAbstractHttpClient
 {
 
@@ -20,29 +11,53 @@ class SyneriseClient extends SyneriseAbstractHttpClient
         return $this->getClientByParameter(array('customIdentify' => $numberCard));
     }
 
-    public function getClientByParameter(array $filds)
+    public function getClientByParameter(array $fields)
     {
-
         try {
-            /**
-             * @var Response
-             */
-            //$response = $this->get(SyneriseAbstractHttpClient::BASE_API_URL . '/coupons/active/' . $token);
+            $response = $this->get(SyneriseAbstractHttpClient::BASE_API_URL . '/client/?' . http_build_query($fields));
+            
+            $responseArray = json_decode($response->getBody(), true);
+            return isset($responseArray['data']) ? $responseArray['data'] : null;
 
-            $request = $this->createRequest("GET", SyneriseAbstractHttpClient::BASE_API_URL . '/client/?' . http_build_query($filds));
-            $response = $this->send($request);
-
-            return $response;
-
-
-
-        } catch (\Exception $e) {
-            $this->_log($e->getMessage(), "CouponERROR");
-            throw $e;
-        }
-
+            } catch (\Exception $e) {
+                if($this->getLogger()) {
+                    $this->getLogger()->alert($e->getMessage());
+                }
+                throw $e;
+            }
     }
 
+    public function batchAddOrUpdateClients(array $items)
+    {
+        $data = array();
+        foreach($items as $item) {
+            if(isset($item['email']) && isset($item['data'])) {
+                $data[$item['email']] = $item['data'];
+            }
+        }
+        
+        if(!empty($data)) {
+            try {
+                $response = $this->post(SyneriseAbstractHttpClient::BASE_API_URL . '/client/batch', array(
+                    'json' => array('items' => $data)
+                ));    
 
+                if ($response->getStatusCode() != '200') {
+                    throw new Exception\SyneriseException('API Synerise not responsed 200.', 500);
+                }
+
+                $responseArray = json_decode($response->getBody(), true);
+                return isset($responseArray['data']) ? $responseArray['data'] : null;
+
+            } catch (\Exception $e) {
+                if($this->getLogger()) {
+                    $this->getLogger()->alert($e->getMessage());
+                }
+                throw $e;
+            }
+        }
+        
+        return false;
+    }
 
 }

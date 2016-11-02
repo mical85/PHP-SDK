@@ -24,7 +24,7 @@ class Client extends ProducerAbstract
     }
 
     public function getCustomIdetify() {
-        return $this->_customIdentify;    
+        return $this->_customIdentify;
     }
 
     public function getEmail() {

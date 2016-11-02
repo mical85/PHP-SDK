@@ -1,32 +1,8 @@
 <?php
 namespace Synerise\Response;
 
-class Coupon
+class Coupon extends AbstractResponse
 {
-
-    /** Coupon value
-     * @var int
-     */
-    private $_status = false;
-
-    /**
-     *  Discount type
-     * @var string "percent", "cost"
-     */
-    private $_discount = null;
-
-    /**
-     *
-     * @var string
-     */
-    private $_redeemedAt = null;
-
-    /**
-     * Discount value
-     *
-     * @var float
-     */
-    private $_value = null;
 
     /**
      *
@@ -41,22 +17,36 @@ class Coupon
     private $_uuid;
 
     /**
+     * discount type
      *
-     * @var string
+     * @var string "percent", "cost"
      */
-    private $_type;
+    private $_discountType;
+
+    /**
+     * discount value
+     *
+     * @var float
+     */
+    private $_discountValue = null;
 
     /**
      *
      * @var string
      */
-    private $_start;
+    private $_code = null;
 
     /**
      *
-     * @var string
+     * @var int
      */
-    private $_expiration;
+    private $_startAt;
+
+    /**
+     *
+     * @var int
+     */
+    private $_endAt;
 
     /**
      *
@@ -70,59 +60,101 @@ class Coupon
      */
     private $_additionalDescription;
 
-    public function __construct($response)
-    {
-
-        $this->_status = $response['code'];
-
-        if (isset($response['data'])) {
-            $coupon = $response['data']['coupon'];
-            $this->_name = $coupon['name'];
-            $this->_uuid = $coupon['uuid'];
-            $this->_discount = $coupon['discount'];
-            $this->_type = $coupon['type'];
-            $this->_value = $coupon['value'];
-            $this->_start = $coupon['start'];
-            $this->_expiration = $coupon['expiration'];
-            $this->_description = $coupon['description'];
-            $this->_additionalDescription = $coupon['additionalDescription'];
-            $this->_redeemedAt = !empty($response['data']['redeemedAt']) && is_numeric($response['data']['redeemedAt']) ? true : false;
-        };
-
-
-    }
-
+    /**
+     *
+     * @var string
+     */
+    private $_termsUrl;
 
     /**
-     * Coupon can be used
-     * @return bool
+     *
+     * @var string
      */
-    public function canUse()
-    {
-        return $this->_status == 1 && $this->_redeemedAt === false;
-    }
+    private $_image;
 
     /**
-     * Coupon is active
-     * @return bool
+     *
+     * @var int
      */
-    public function isActive()
+    private $_validFor;
+
+    /**
+     *
+     * @var int
+     */
+    private $_limitPerClient;
+
+    /**
+     *
+     * @var int
+     */
+    private $_limitGlobal;
+
+    /**
+     *
+     * @var boolean
+     */
+    private $_activationRequired;
+
+    /**
+     *
+     * @var boolean
+     */
+    private $_strictUse;
+
+    /**
+     *
+     * @var array
+     */
+    private $_tags;
+
+    /**
+     *
+     * @var array
+     */
+    private $_locations;
+
+    /**
+     *
+     * @var array
+     */
+    private $_attributes;
+
+    /**
+     *
+     * @var array
+     */
+    private $_products;
+
+    public function __construct(array $response)
     {
-        return $this->_status == 1111; //@todo docelowo kupon jest aktywny ale nie spełnia warunków koszyka
-    }
-
-
-    public function getMessage()
-    { //@todo jeśli kupon jest aktwyny ale brakuje innych warunków aby go wykorzystać (pamiętać o różnych warunkach i o wersjach językowych, walutach).
-        if ($this->isActive()) {
-            return array(
-                'code' => 881,
-                'message' => '20',
-                'description' => 'Kup coś za 20zł aby móc użyć kuponu'
-            );
+        if(isset($response['data'])) {
+            parent::__construct($response);
+            $data = $response['data'];
+        } else {
+            $data = $response;
         }
 
-        return;
+        $this->_uuid                    = isset($data['uuid']) ? $data['uuid'] : null;
+        $this->_name                    = isset($data['name']) ? $data['name'] : null;
+        $this->_description             = isset($data['description']) ? $data['description'] : null;
+        $this->_additionalDescription   = isset($data['additionalDescription']) ? $data['additionalDescription'] : null;
+        $this->_termsUrl                = isset($data['termsUrl']) ? $data['termsUrl'] : null;
+        $this->_discountType            = isset($data['discountType']) ? $data['discountType'] : null;
+        $this->_discountValue           = isset($data['discountValue']) ? $data['discountValue'] : null;
+        $this->_startAt                 = isset($data['startAt']) ? $data['startAt'] : null;
+        $this->_endAt                   = isset($data['endAt']) ? $data['endAt'] : null;
+        $this->_image                   = isset($data['image']) ? $data['image'] : null;
+        $this->_validFor                = isset($data['validFor']) ? $data['validFor'] : null;
+        $this->_code                    = isset($data['code']) ? $data['code'] : null;
+        $this->_tags                    = isset($data['tags']) ? $data['tags'] : null;
+        $this->_locations               = isset($data['locations']) ? $data['locations'] : null;
+        $this->_attributes              = isset($data['attributes']) ? $data['attributes'] : null;
+        $this->_products                = isset($data['products']) ? $data['products'] : null;
+        $this->_limitGlobal             = isset($data['limitGlobal']) ? $data['limitGlobal'] : null;
+        $this->_limitPerClient          = isset($data['limitPerClient']) ? $data['limitPerClient'] : null;
+        $this->_activationRequired      = isset($data['activationRequired']) ? $data['activationRequired'] : null;
+        $this->_strictUse               = isset($data['strictUse']) ? $data['strictUse'] : null;
     }
 
     public function getUuid()
@@ -150,23 +182,78 @@ class Coupon
         return $this->_name;
     }
 
-    public function getType()
+    public function getDiscountType()
     {
-        return $this->_type;
+        return $this->_discountType;
     }
 
-    public function getValue()
+    public function getDiscountValue()
     {
-        return (float)$this->_value;
+        return (float) $this->_discountValue;
     }
 
-    public function getStart()
+    public function getStartAt()
     {
-        return $this->_start;
+        return $this->_startAt;
     }
 
-    public function getExpiration()
+    public function getEndAt()
     {
-        return $this->_expiration;
+        return $this->_endAt;
+    }
+
+    public function getTermsUrl()
+    {
+        return $this->_termsUrl;
+    }
+
+    public function getImage()
+    {
+        return $this->_image;
+    }
+
+    public function getValidFor()
+    {
+        return $this->_validFor;
+    }
+
+    public function getCode()
+    {
+        return $this->_code;
+    }
+
+    public function getTags()
+    {
+        return $this->_tags;
+    }
+
+    public function getLocations()
+    {
+        return $this->_locations;
+    }
+
+    public function getAttributes()
+    {
+        return $this->_attributes;
+    }
+
+    public function getProducts()
+    {
+        return $this->_products;
+    }
+
+    public function getLimitGlobal()
+    {
+        return $this->_limitGlobal;
+    }
+
+    public function getLimitPerClient()
+    {
+        return $this->_limitPerClient;
+    }
+
+    public function getStrictUse()
+    {
+        return $this->_strictUse;
     }
 }
