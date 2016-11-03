@@ -11,7 +11,7 @@ You can get the library using Composer by including the following in your projec
 ```json
 {
     "require": {
-        "synerise/php-sdk": "2.1.0"
+        "synerise/php-sdk": "2.2.0"
     }
 }
 ```
