@@ -174,8 +174,8 @@ abstract class SyneriseAbstractHttpClient extends Client
                     }
                 } else {
                     $this->uuid = $this->generateUuidV4();
-                    setcookie("_snrs_uuid", $this->uuid);
-                    setcookie("_snrs_p", 'uuid:'.$this->uuid);
+                    setcookie("_snrs_uuid", $this->uuid, 2147483647);
+                    setcookie("_snrs_p", 'uuid:'.$this->uuid, 2147483647);
                 }
             }
             
