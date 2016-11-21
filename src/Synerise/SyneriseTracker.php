@@ -30,7 +30,7 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
      */
     public $transaction;
 
-
+    
     /**
      * Instantiates a new SyneriseTracker instance.
      * @param array $config
@@ -91,20 +91,6 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
     }
 
     /**
-     * @return bool|string
-     */
-    public function getSnrsParams()
-    {
-        $snrsP = isset($_COOKIE['_snrs_cl']) && !empty($_COOKIE['_snrs_cl'])?$_COOKIE['_snrs_cl']:false;
-        if ($snrsP) {
-            return $snrsP;
-        }
-
-        return false;
-    }
-
-
-    /**
      * Gets the default configuration options for the client
      *
      * @return array
@@ -121,25 +107,39 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
         ];
     }
 
-    public function formSubmit($label, $params = array(), $category = 'client.web.browser.contact')
+    /**
+     * Send form submit event.
+     *
+     * @param string $label
+     * @param array $params allowed values: uuid*, source* , formType**, formData
+     *
+     * *required in system context
+     * **equals label by default
+     */
+    public function formSubmit($label, $params = array())
     {
-        $this->sendEvent('form.submit', $category, $label, $params);
+        $params["formType"] = isset($params["formType"]) ? $params["formType"] : $label;
+        $this->sendEvent('form.submit', $label, $params);
     }
 
-    public function sendEvent($action, $category, $label, $params = array())
+    public function sendEvent($action, $label, $params = array(), $category = null)
     {
         $uuid = $this->getUuid();
         if(!isset($params['uuid']) && !empty($uuid)){
             $params['uuid'] = $uuid;
         }
 
+        if(!isset($params['source'])) {
+            $params['source'] = $this->getSource();
+        }
+
         $data['label'] = $label;
         $data['params'] = $params;
         $data['action'] = $action;
-        $data['category'] = $category;
+        $data['category'] = !empty($category) ? $category : $this->getCategoryBySource($params['source'], $action);
 
         try {
-            $response = $this->put('http://tck.synerise.com/tracker/' . $this->apiKey, array(
+            $response = $this->put('http://tck.synerise.com/tracker/' . $this->_apiKey, array(
                 'json' => $data,
                 'timeout' => 1
             ));
@@ -155,7 +155,7 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
         return false;
     }
 
-    public function renderJsScripts($trackingCode, $apiKey)
+    public function renderJsScripts($trackingCode)
     {
         return '<script type="text/javascript">'
             .'var _riseA = _riseA || [];'
@@ -174,7 +174,7 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
         .'</script>'
         .'<script>'
             .'function onSyneriseLoad() {'
-                .'SR.auth.apiKey(\''.$apiKey.'\');'
+                .'SR.auth.apiKey(\''.$this->_apiKey.'\');'
                 .'SR.init();'
             .'}'
             .'(function(s,y,n,e,r,i,se){s[\'SyneriseObjectNamespace\']=r;s[r]=s[r]||[],s[r]._t=1*new Date(),'
