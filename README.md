@@ -151,13 +151,12 @@ For logging purposes a psr-3 compliant logger needs to be provided, eg Monolog. 
 
 Monolog example:
 
-```
+```php
 $logPath = __DIR__ . DIRECTORY_SEPARATOR . 'logs/synerise.log';
 
 $logger = new \Monolog\Logger('api');
 
 $fileHandler = new \Monolog\Handler\RotatingFileHandler(logPath, 12, \Monolog\Logger::INFO);
-
 $fileHandler->setFormatter(new \Monolog\Formatter\LineFormatter("[%datetime%] %channel%.%level_name%:\n%message%\n", null, true));
 
 $logger->pushHandler($fileHandler);
