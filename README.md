@@ -163,3 +163,4 @@ $logger->pushHandler($fileHandler);
 
 $snr = Synerise\SyneriseTracker::getInstance($params, $logger);
 ```
+Note: Absolute log path is mandatory for SyneriseTracker instance.
