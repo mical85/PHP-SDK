@@ -4,6 +4,7 @@ namespace Synerise;
 use GuzzleHttp\Client;
 use Synerise\Adapter\Guzzle5 as Guzzle5Adapter;
 use Synerise\Adapter\Guzzle6 as Guzzle6Adapter;
+use Synerise\Helper\Cookie;
 use Detection\MobileDetect as Mobile_Detect;
 
 abstract class SyneriseAbstractHttpClient extends Client
@@ -65,7 +66,9 @@ abstract class SyneriseAbstractHttpClient extends Client
 
     private static $_instances = array();
 
-    private $_context = self::APP_CONTEXT_CLIENT;
+    protected $_context = self::APP_CONTEXT_CLIENT;
+
+    protected $_cookie;
 
     protected $_apiKey = null;
 
@@ -96,9 +99,14 @@ abstract class SyneriseAbstractHttpClient extends Client
             $this->_apiKey = $config['apiKey'];
         }
 
+        $this->_cookie = Cookie::getInstance();
+
         if(isset($config['context']) && $config['context'] == self::APP_CONTEXT_SYSTEM) {
             $this->_context = self::APP_CONTEXT_SYSTEM;
         } else {
+            if(!Cookie::isAllowedUse()) {
+                throw new \Exception('Cookie use not allowed.');
+            }
             $this->_context = self::APP_CONTEXT_CLIENT;
             $this->getUuid();
         }
@@ -153,35 +161,22 @@ abstract class SyneriseAbstractHttpClient extends Client
     {
         if(empty($this->uuid) && $this->_context == self::APP_CONTEXT_CLIENT) {
 
-            $this->uuid = isset($_COOKIE['_snrs_uuid']) ? $_COOKIE['_snrs_uuid'] : false;
+            $this->uuid = $this->_cookie->getUuid();
 
             if(empty($this->uuid)) {
-                $snrsP = isset($_COOKIE['_snrs_p'])?$_COOKIE['_snrs_p']:false;
-                if ($snrsP) {
-                    $snrsP = explode('&', $snrsP);
-                    foreach ($snrsP as $snrs_part) {
-                        if (strpos($snrs_part, 'uuid:') !== false) {
-                            $this->uuid = str_replace('uuid:', null, $snrs_part);
-                        }
-                    }
-                }
+                $this->setUuid($this->generateUuidV4());
             }
-
-            if(empty($this->uuid)) {
-                if (headers_sent()) {
-                    if($this->getLogger()) {
-                        $this->getLogger()->alert('Headers already sent. Cookie cannot be set');
-                    }
-                } else {
-                    $this->uuid = $this->generateUuidV4();
-                    setcookie("_snrs_uuid", $this->uuid, 2147483647);
-                    setcookie("_snrs_p", 'uuid:'.$this->uuid, 2147483647);
-                }
-            }
-            
         }
 
-        return $this->uuid;
+        return !empty($this->uuid) ? $this->uuid : null;
+    }
+
+    protected function setUuid($uuid) {
+        $this->uuid = $uuid;
+        if($this->_context == self::APP_CONTEXT_CLIENT) {
+            return $this->_cookie->setUuid($this->uuid);
+        }
+        return true;
     }
 
     public function getLogger()
@@ -220,6 +215,50 @@ abstract class SyneriseAbstractHttpClient extends Client
         }
 
         return ($data);
+    }
+
+    public function hashString($string) {
+        return md5($string);
+    }
+
+    public function regenerateUuid($email) {
+        $emHash = $this->hashString($email);
+        if ($emHash) {
+            if($this->getLogger()) {
+                $this->getLogger()->notice('Generated hash "'.$emHash.'" from email "'.$email.'"');
+            }
+
+            $prevHash = $this->_cookie->getEmailHash();
+            if(!empty($prevHash)) {
+                if($this->getLogger()) {
+                    $this->getLogger()->notice('Saved email hash: "'.$prevHash.'"');
+                }
+            }
+            if($prevHash != $emHash) {
+
+                if($this->_cookie->setEmailHash($emHash)) {
+                    if($this->getLogger()) {
+                        $this->getLogger()->notice('Email hash has been changed !');
+                    }
+                } else {
+                    if($this->getLogger()) {
+                        $this->getLogger()->alert('Email hash can not be changed !');
+                    }
+                }
+
+                $prevUuid = $this->getUuid();
+                $newUuid = $this->generateUuidV4();
+                if($this->setUuid($newUuid)) {
+                    if($this->getLogger()) {
+                        $this->getLogger()->notice('CHANGING UUID! "'. $prevUuid .'" to "'+ $newUuid +'"');
+                    }
+                } else {
+                    if($this->getLogger()) {
+                        $this->getLogger()->alert('Uuid can not be changed !');
+                    }
+                }
+            }
+        }
     }
 
     public static function generateUuidV4(){
