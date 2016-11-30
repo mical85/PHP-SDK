@@ -50,13 +50,13 @@ class Cookie
     }
 
     public function setEmailHash($hash) {
-        $_snrs_p = $this->getCookie(self::SNRS_P);
-        if(!is_array($_snrs_p)) {
-            $_snrs_p = array();
+        $p = $this->getCookie(self::SNRS_P);
+        if(!is_array($p)) {
+            $p = array();
 
         }
-        $_snrs_p['emailHash'] = $hash;
-        $this->setCookie(self::SNRS_P, $_snrs_p);
+        $p['emailHash'] = $hash;
+        $this->setCookie(self::SNRS_P, $p);
         return true;
     }
 
@@ -112,8 +112,10 @@ class Cookie
 
     protected function _breakCookie($cookieString) {
         $array = explode("&",$cookieString);
-
-        if(count($array) < 2) {
+        if(empty($cookieString)) {
+            return null;
+        }
+        if(!is_array($array)) {
             return $cookieString;
         }
 

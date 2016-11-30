@@ -229,32 +229,36 @@ abstract class SyneriseAbstractHttpClient extends Client
             }
 
             $prevHash = $this->_cookie->getEmailHash();
-            if(!empty($prevHash)) {
+         
+            if(empty($prevHash)) {
+                if($this->_cookie->setEmailHash($emHash));
+            } else {
                 if($this->getLogger()) {
                     $this->getLogger()->notice('Saved email hash: "'.$prevHash.'"');
                 }
-            }
-            if($prevHash != $emHash) {
 
-                if($this->_cookie->setEmailHash($emHash)) {
-                    if($this->getLogger()) {
-                        $this->getLogger()->notice('Email hash has been changed !');
-                    }
-                } else {
-                    if($this->getLogger()) {
-                        $this->getLogger()->alert('Email hash can not be changed !');
-                    }
-                }
+                if($prevHash != $emHash) {
 
-                $prevUuid = $this->getUuid();
-                $newUuid = $this->generateUuidV4();
-                if($this->setUuid($newUuid)) {
-                    if($this->getLogger()) {
-                        $this->getLogger()->notice('CHANGING UUID! "'. $prevUuid .'" to "'+ $newUuid +'"');
+                    if($this->_cookie->setEmailHash($emHash)) {
+                        if($this->getLogger()) {
+                            $this->getLogger()->notice('Email hash has been changed !');
+                        }
+                    } else {
+                        if($this->getLogger()) {
+                            $this->getLogger()->alert('Email hash can not be changed !');
+                        }
                     }
-                } else {
-                    if($this->getLogger()) {
-                        $this->getLogger()->alert('Uuid can not be changed !');
+
+                    $prevUuid = $this->getUuid();
+                    $newUuid = $this->generateUuidV4();
+                    if($this->setUuid($newUuid)) {
+                        if($this->getLogger()) {
+                            $this->getLogger()->notice('CHANGING UUID! "'. $prevUuid .'" to "'+ $newUuid +'"');
+                        }
+                    } else {
+                        if($this->getLogger()) {
+                            $this->getLogger()->alert('Uuid can not be changed !');
+                        }
                     }
                 }
             }
