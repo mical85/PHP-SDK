@@ -124,9 +124,18 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
 
     public function sendEvent($action, $label, $params = array(), $category = null)
     {
-        $uuid = $this->getUuid();
-        if(!isset($params['uuid']) && !empty($uuid)){
-            $params['uuid'] = $uuid;
+        if(!isset($params['uuid']) && !empty($this->getUuid())){
+            if($this->_context == self::APP_CONTEXT_CLIENT) {
+                if(isset($params['email']) && !empty($params['email'])) {
+                    $this->regenerateUuid($params['email']);
+                } elseif(isset($params['formData'])) {
+                    $formData = json_decode($params['formData']);
+                    if(isset($formData->email) && !empty($formData->email)) {
+                        $this->regenerateUuid($formData->email);
+                    }
+                }
+            }
+            $params['uuid'] = $this->getUuid();
         }
 
         if(!isset($params['source'])) {
