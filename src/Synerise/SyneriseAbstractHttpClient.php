@@ -99,17 +99,23 @@ abstract class SyneriseAbstractHttpClient extends Client
             $this->_apiKey = $config['apiKey'];
         }
 
-        $this->_cookie = Cookie::getInstance();
-
         if(isset($config['context']) && $config['context'] == self::APP_CONTEXT_SYSTEM) {
+            $cookie = array();
+            if(isset($config['cookie'])) {
+                $cookie = is_string($config['cookie']) ? json_decode($config['cookie'], true) : (array) $config['cookie'];
+            }
+            $this->_cookie = Cookie::getInstance($cookie, array('context' => self::APP_CONTEXT_SYSTEM));
             $this->_context = self::APP_CONTEXT_SYSTEM;
         } else {
+            $this->_cookie = Cookie::getInstance();
             if(!Cookie::isAllowedUse()) {
                 throw new \Exception('Cookie use not allowed.');
             }
             $this->_context = self::APP_CONTEXT_CLIENT;
-            $this->getUuid();
         }
+        
+        
+        $this->getUuid();
 
         switch (substr(self::VERSION,0,1)):
             case '6':
@@ -117,6 +123,9 @@ abstract class SyneriseAbstractHttpClient extends Client
                 parent::__construct($config);
                 break;
             case '5':
+                if(isset($config['verify']) && $config['verify'] == false) {
+                    $config['defaults'] = array('verify' => false);
+                }
                 $config = Guzzle5Adapter::prepareConfig(self::mergeConfig($config), $logger);
                 parent::__construct($config);
                 $this->setDefaultOption('headers', $config['headers']);
@@ -157,13 +166,13 @@ abstract class SyneriseAbstractHttpClient extends Client
     /**
      * @return bool|string
      */
-    protected function getUuid()
+    public function getUuid()
     {
-        if(empty($this->uuid) && $this->_context == self::APP_CONTEXT_CLIENT) {
+        if(empty($this->uuid)) {
 
             $this->uuid = $this->_cookie->getUuid();
 
-            if(empty($this->uuid)) {
+            if($this->_context == self::APP_CONTEXT_CLIENT && empty($this->uuid)) {
                 $this->setUuid($this->generateUuidV4());
             }
         }
@@ -173,10 +182,10 @@ abstract class SyneriseAbstractHttpClient extends Client
 
     protected function setUuid($uuid) {
         $this->uuid = $uuid;
-        if($this->_context == self::APP_CONTEXT_CLIENT) {
+//        if($this->_context == self::APP_CONTEXT_CLIENT) {
             return $this->_cookie->setUuid($this->uuid);
-        }
-        return true;
+//        }
+//        return true;
     }
 
     public function getLogger()
@@ -231,7 +240,7 @@ abstract class SyneriseAbstractHttpClient extends Client
             $prevHash = $this->_cookie->getEmailHash();
          
             if(empty($prevHash)) {
-                if($this->_cookie->setEmailHash($emHash));
+                $this->_cookie->setEmailHash($emHash);
             } else {
                 if($this->getLogger()) {
                     $this->getLogger()->notice('Saved email hash: "'.$prevHash.'"');

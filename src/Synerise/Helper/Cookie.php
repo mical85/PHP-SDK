@@ -6,11 +6,21 @@ class Cookie
     const SNRS_P    = '_snrs_p';
     const SNRS_UUID = '_snrs_uuid';
 
-    protected $_data;
+    protected $_data = array();
 
     protected $_uuid;
 
     private static $_instance;
+
+    protected $_context = \Synerise\SyneriseTracker::APP_CONTEXT_CLIENT;
+
+    public function __construct(array $_cookie = array(), $config)
+    {
+        $this->setCookiesData((empty($_cookie) && isset($_COOKIE)) ? $_COOKIE : $_cookie);
+        if(isset($config['context'])) {
+            $this->_context = $config['context'];
+        }
+    }
 
     /**
      * Determine whether current session allows cookie use
@@ -28,10 +38,10 @@ class Cookie
      * @return string
      */
     public function getCookieString($name) {
-        if(!isset($this->data[$name])) {
-           $this->data[$name] = isset($_COOKIE[$name]) ? $_COOKIE[$name] : null;
+        if(!isset($this->_data[$name])) {
+           $this->_data[$name] = isset($_COOKIE[$name]) ? $_COOKIE[$name] : null;
         }
-        return $this->data[$name];
+        return $this->_data[$name];
     }
 
     /**
@@ -82,8 +92,13 @@ class Cookie
 
     public function setCookie($name, $value) {
         $string = is_array($value) ? static::_buildCookie($value) : $value;
-        $this->data[$name] = $string;
-        return setcookie($name, (string) $string, 2147483647);
+        $this->_data[$name] = $string;
+
+        if($this->_context == \Synerise\SyneriseTracker::APP_CONTEXT_SYSTEM) {
+            return true;
+        }
+
+        return setcookie($name, (string) $string, 2147483647, '/');
     }
 
     public function setUuid($uuid) {
@@ -132,12 +147,26 @@ class Cookie
      * Returns a singleton instance
      * @return self
      */
-    public static function getInstance() {
+    public static function getInstance(array $cookie = array(), $config = array()) {
         $class = get_called_class();
         if (!isset(self::$_instance)) {
-            self::$_instance = new $class();
+            self::$_instance = new $class($cookie, $config);
         }
         return self::$_instance;
+    }
+
+    public function setCookiesData($_cookie)
+    {
+        foreach ($_cookie as $key => $value) {
+            if("_snrs" == substr($key,0,5)) {
+                $this->_data[$key] = $value;
+            }
+        }
+    }
+
+    public function getSnrsCookieString()
+    {
+        return json_encode($this->_data);
     }
 
 }

@@ -3,6 +3,7 @@ namespace Synerise\Producers;
 
 use Synerise\Producers\Client;
 use Synerise\Exception\SyneriseException;
+use Synerise\Helper\Cookie;
 
 
 abstract class ProducerAbstract
@@ -20,11 +21,17 @@ abstract class ProducerAbstract
 
     protected $_uuid;
 
+    protected $_cookie;
+
+    public function __construct()
+    {
+        $this->_cookie = Cookie::getInstance();
+    }
+
     /**
      * Returns a singleton instance of Event
      * @return ProducerAbstract
      */
-
     public static function getInstance() {
         $class = get_called_class();
         if (!isset(self::$_instances[$class])) {
@@ -148,7 +155,7 @@ abstract class ProducerAbstract
      */
     public function getSnrsParams()
     {
-        $snrsP = isset($_COOKIE['_snrs_params']) && !empty($_COOKIE['_snrs_params'])?$_COOKIE['_snrs_params']:false;
+        $snrsP = $this->_cookie->getCookieString('_snrs_params');
         if ($snrsP) {
             $dataSendSnrs = @json_decode($snrsP);
             if ($dataSendSnrs) {
@@ -168,7 +175,7 @@ abstract class ProducerAbstract
             return $this->_uuid;
         }
 
-        $snrsP = isset($_COOKIE['_snrs_p'])?$_COOKIE['_snrs_p']:false;
+        $snrsP = $this->_cookie->getCookieString('_snrs_p');
         if ($snrsP) {
             $snrsP = explode('&', $snrsP);
             foreach ($snrsP as $snrs_part) {
@@ -186,7 +193,7 @@ abstract class ProducerAbstract
      */
     private function getSsuid()
     {
-        $snrsS = isset($_COOKIE['_snrs_sa'])?$_COOKIE['_snrs_sa']:false;
+        $snrsS = $this->_cookie->getCookieString('_snrs_sa');
         if ($snrsS) {
             $snrsS = explode('&', $snrsS);
             foreach ($snrsS as $snrs_part) {
