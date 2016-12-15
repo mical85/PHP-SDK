@@ -12,9 +12,14 @@ class Cookie
 
     private static $_instance;
 
-    public function __construct(array $_cookie = array())
+    protected $_context = \Synerise\SyneriseTracker::APP_CONTEXT_CLIENT;
+
+    public function __construct(array $_cookie = array(), $config)
     {
         $this->setCookiesData((empty($_cookie) && isset($_COOKIE)) ? $_COOKIE : $_cookie);
+        if(isset($config['context'])) {
+            $this->_context = $config['context'];
+        }
     }
 
     /**
@@ -88,6 +93,11 @@ class Cookie
     public function setCookie($name, $value) {
         $string = is_array($value) ? static::_buildCookie($value) : $value;
         $this->_data[$name] = $string;
+
+        if($this->_context == \Synerise\SyneriseTracker::APP_CONTEXT_SYSTEM) {
+            return true;
+        }
+
         return setcookie($name, (string) $string, 2147483647, '/');
     }
 
@@ -137,10 +147,10 @@ class Cookie
      * Returns a singleton instance
      * @return self
      */
-    public static function getInstance(array $cookie = array()) {
+    public static function getInstance(array $cookie = array(), $config = array()) {
         $class = get_called_class();
         if (!isset(self::$_instance)) {
-            self::$_instance = new $class($cookie);
+            self::$_instance = new $class($cookie, $config);
         }
         return self::$_instance;
     }

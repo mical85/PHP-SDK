@@ -3,6 +3,7 @@ namespace Synerise\Producers;
 
 use Synerise\Producers\Client;
 use Synerise\Exception\SyneriseException;
+use Synerise\Helper\Cookie;
 
 
 abstract class ProducerAbstract

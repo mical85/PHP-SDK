@@ -104,7 +104,7 @@ abstract class SyneriseAbstractHttpClient extends Client
             if(isset($config['cookie'])) {
                 $cookie = is_string($config['cookie']) ? json_decode($config['cookie'], true) : (array) $config['cookie'];
             }
-            $this->_cookie = Cookie::getInstance($cookie);
+            $this->_cookie = Cookie::getInstance($cookie, array('context' => self::APP_CONTEXT_SYSTEM));
             $this->_context = self::APP_CONTEXT_SYSTEM;
         } else {
             $this->_cookie = Cookie::getInstance();
