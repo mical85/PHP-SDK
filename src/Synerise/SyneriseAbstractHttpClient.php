@@ -87,6 +87,18 @@ abstract class SyneriseAbstractHttpClient extends Client
         return self::$_instances[$class];
     }
 
+    public static function flushAllInstances()
+    {
+        self::flushInstances();
+        Producers\ProducerAbstract::flushInstances();
+        Helper\HelperAbstract::flushInstance();
+    }
+
+    public static function flushInstances()
+    {
+        self::$_instances = array();
+    }
+
     /**
      * Instantiates a new instance.
      * @param array $config
@@ -99,21 +111,16 @@ abstract class SyneriseAbstractHttpClient extends Client
             $this->_apiKey = $config['apiKey'];
         }
 
-        if(isset($config['context']) && $config['context'] == self::APP_CONTEXT_SYSTEM) {
-            $cookie = array();
-            if(isset($config['cookie'])) {
-                $cookie = is_string($config['cookie']) ? json_decode($config['cookie'], true) : (array) $config['cookie'];
-            }
-            $this->_cookie = Cookie::getInstance($cookie, array('context' => self::APP_CONTEXT_SYSTEM));
+        $this->_cookie = Cookie::getInstance($config);
+
+        if(isset($config['context']) && $config['context'] == self::APP_CONTEXT_SYSTEM) {    
             $this->_context = self::APP_CONTEXT_SYSTEM;
         } else {
-            $this->_cookie = Cookie::getInstance();
             if(!Cookie::isAllowedUse()) {
                 throw new \Exception('Cookie use not allowed.');
             }
             $this->_context = self::APP_CONTEXT_CLIENT;
         }
-        
         
         $this->getUuid();
 
