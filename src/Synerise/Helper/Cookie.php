@@ -1,7 +1,7 @@
 <?php
 namespace Synerise\Helper;
 
-class Cookie
+class Cookie extends HelperAbstract
 {
     const SNRS_P    = '_snrs_p';
     const SNRS_UUID = '_snrs_uuid';
@@ -10,12 +10,15 @@ class Cookie
 
     protected $_uuid;
 
-    private static $_instance;
-
     protected $_context = \Synerise\SyneriseTracker::APP_CONTEXT_CLIENT;
 
-    public function __construct(array $_cookie = array(), $config)
+    public function __construct(array $config = array())
     {
+        $_cookie = array();
+        if(isset($config['context']) && $config['context'] == \Synerise\SyneriseTracker::APP_CONTEXT_SYSTEM && isset($config['cookie'])) {
+            $_cookie = is_string($config['cookie']) ? json_decode($config['cookie'], true) : (array) $config['cookie'];
+        }
+
         $this->setCookiesData((empty($_cookie) && isset($_COOKIE)) ? $_COOKIE : $_cookie);
         if(isset($config['context'])) {
             $this->_context = $config['context'];
@@ -141,18 +144,6 @@ class Cookie
         }
 
         return $array;
-    }
-
-    /**
-     * Returns a singleton instance
-     * @return self
-     */
-    public static function getInstance(array $cookie = array(), $config = array()) {
-        $class = get_called_class();
-        if (!isset(self::$_instance)) {
-            self::$_instance = new $class($cookie, $config);
-        }
-        return self::$_instance;
     }
 
     public function setCookiesData($_cookie)

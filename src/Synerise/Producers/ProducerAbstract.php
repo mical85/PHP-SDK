@@ -40,6 +40,11 @@ abstract class ProducerAbstract
         return self::$_instances[$class];
     }
 
+    public static function flushInstances()
+    {
+        self::$_instances = array();
+    }
+
     /**
      * Empties the queue without persisting any of the messages
      */

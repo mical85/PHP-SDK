@@ -10,7 +10,7 @@ class SyneriseCoupon extends SyneriseAbstractHttpClient
 
     /**
      * Get activated coupon details
-     * 
+     *
      * @param $code
      * @return Response\ActiveCoupon
      * @throws SyneriseException
@@ -77,13 +77,14 @@ class SyneriseCoupon extends SyneriseAbstractHttpClient
     {
 
         try {
-            $response = $this->get(SyneriseAbstractHttpClient::BASE_API_URL . '/admin/coupons/');
+            $response = $this->get(SyneriseAbstractHttpClient::BASE_API_URL . '/coupons/');
 
             if ($response->getStatusCode() == '200') {
                 $collection = array();
                 $json = json_decode($response->getBody(), true);
                 if(isset($json['data']) && isset($json['data']['coupons'])) {
                     foreach($json['data']['coupons'] as $key => $item) {
+                        $item['uuid'] = $key;
                         $collection[$key] = (new Response\Coupon($item));
                     }
                     return $collection;
