@@ -183,7 +183,7 @@ class SyneriseTracker extends SyneriseAbstractHttpClient
         .'</script>'
         .'<script>'
             .'function onSyneriseLoad() {'
-                .'SR.auth.apiKey(\''.$this->_apiKey.'\');'
+                .'SR.auth.trackerKey(\''.$trackingCode.'\');'
                 .'SR.init();'
             .'}'
             .'(function(s,y,n,e,r,i,se){s[\'SyneriseObjectNamespace\']=r;s[r]=s[r]||[],s[r]._t=1*new Date(),'
