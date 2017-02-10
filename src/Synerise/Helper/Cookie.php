@@ -101,7 +101,20 @@ class Cookie extends HelperAbstract
             return true;
         }
 
-        return setcookie($name, (string) $string, 2147483647, '/');
+        return setrawcookie($name, (string) $string, 2147483647, '/', $this->getHostToCookie());
+    }
+
+    private function getHostToCookie() {
+
+        if(!empty($_SERVER['HTTP_HOST'])) {
+            $domain = $_SERVER['HTTP_HOST'];
+            $domain = explode('.', $domain);
+            $domain = array_reverse($domain);
+            if(!empty($domain[0]) && !empty($domain[1])) {
+                return ".$domain[1].$domain[0]";
+            }
+        }
+        return null;
     }
 
     public function setUuid($uuid) {
